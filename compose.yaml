@@ -1,0 +1,41 @@
+services:
+  gele-golang:
+    build:
+      context: ./golang/
+      dockerfile: Dockerfile
+    image: gele-golang
+
+  tl-sensor:
+    build:
+      context: ./tl-sensor/
+      dockerfile: Dockerfile
+    depends_on:
+      - gele-golang
+    environment: 
+      - CLIMATECTL_ADDRESS=climatectl:8080
+    hostname: tl-sensor
+    image: tl-sensor-image
+
+  climatectl:
+    build:
+      context: ./climatectl/
+      dockerfile: Dockerfile
+    environment:
+      - TL_SENSOR_ADDRESS=tl-sensor:8080
+    hostname: climatectl
+    depends_on:
+      - gele-golang
+      - tl-sensor
+    image: climatectl-image
+
+  shutterctl:
+    build:
+      context: ./shutterctl/
+      dockerfile: Dockerfile
+    environment:
+      - TL_SENSOR_ADDRESS=tl-sensor:8080
+    hostname: shutterctl 
+    depends_on:
+      - gele-golang
+      - tl-sensor
+    image: shutterctl-image
